@@ -1,0 +1,45 @@
+// Plugins
+apply plugin: 'java'
+
+// Global configuration
+archivesBaseName = 'myApp'
+version = '1.0'
+sourceCompatibility = '1.7'
+targetCompatibility = '1.7'
+
+// Jar properties
+jar {
+    sourceSets.main.resources { 
+		srcDirs = ["src/main/resources"]
+		exclude "**/*.java" 
+	}
+    from {
+    	configurations.compile.collect {
+			it.isDirectory() ? it : zipTree(it)
+		}
+	}
+    manifest {
+        attributes 	(
+			'Author': 'Jefferson Morales',
+			'Version': version,
+			'Main-Class': 'app.mainpackage.MainClass'
+		)
+    }    
+}
+
+// Get dependencies from Maven central repository
+repositories {
+	mavenCentral()
+}
+
+// Project dependencies
+dependencies {
+	compile 'log4j:log4j:1.2.17'
+	compile fileTree(dir: 'libs', include: ['**/*.jar'])
+}
+
+// Compile and execute application
+task java (dependsOn: jar) << {
+	delete 'myApp.log.html'
+	javaexec { main="-jar"; args jar.archivePath }
+}
